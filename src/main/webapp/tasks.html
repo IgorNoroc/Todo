@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -26,12 +25,19 @@
             right: 400px;
             top: 200px;
         }
+
+        #user {
+            position: absolute;
+            right: 400px;
+            top: 10px;
+        }
     </style>
     <script>
         function table(data) {
             let table = $('#table')
             data.forEach(el => {
                 table.append('<tr>')
+                table.append('<td>' + el.user.name + '</td>')
                 table.append('<td>' + el.description + '</td>')
                 table.append('<td>' + el.created + '</td>')
                 if (el.done === false) {
@@ -120,8 +126,29 @@
             loadTable()
         }
     }
+
+    $(document).ready(function () {
+        $.ajax({
+            type: 'Get',
+            url: 'http://localhost:8080/ToDo/currentUser',
+            dataType: 'json'
+        }).done(function (data) {
+            $('#u').replaceWith('<div>' + data.name + ' | Выйти</div>')
+        })
+    })
 </script>
 
+<div class="row" id="user">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="index.jsp">
+                <div class="container">
+                    <div id="u" class="topright"></div>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>
 <div class="container">
     <div class="row pt-3">
         <table class="table table-bordered" style="background-color: azure">
@@ -164,7 +191,8 @@
         <table class="table table-bordered" style="background-color: azure">
             <thead>
             <tr>
-                <th>Задача</th>
+                <th>Автор</th>
+                <th style="width: 400px">Задача</th>
                 <th>Дата создания</th>
                 <th>Процесс выполнения</th>
             </tr>

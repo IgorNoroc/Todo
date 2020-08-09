@@ -7,6 +7,7 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import ru.job4j.todo.model.Item;
+import ru.job4j.todo.model.User;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -34,9 +35,15 @@ public class DBItem {
      * @param item item.
      * @return item.
      */
-    public Item addItem(Item item) {
+    public Item addItem(Item item, User user) {
+        item.setUser(user);
         request(session -> session.save(item));
         return item;
+    }
+
+    public User addUser(User user) {
+        request(session -> session.save(user));
+        return user;
     }
 
     /**
@@ -48,6 +55,12 @@ public class DBItem {
     public Item findById(int id) {
         return request(
                 session -> session.get(Item.class, id));
+    }
+
+    public User findByEmail(String email) {
+        return (User) request(
+                session -> session.createQuery("from User where email='" + email + "'").getSingleResult()
+        );
     }
 
     /**
@@ -101,10 +114,10 @@ public class DBItem {
             return rsl;
         } catch (final Exception e) {
             session.getTransaction().rollback();
-            throw e;
+            e.printStackTrace();
+            return null;
         } finally {
             session.close();
         }
     }
-
 }

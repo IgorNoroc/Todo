@@ -5,11 +5,14 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "item")
+@Table(name = "items")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
     private String description;
     private Date created;
     private boolean done;
@@ -25,8 +28,12 @@ public class Item {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getDescription() {
@@ -77,6 +84,7 @@ public class Item {
     public String toString() {
         return "Item{" +
                 "id=" + id +
+                ", user=" + user +
                 ", description='" + description + '\'' +
                 ", created=" + created +
                 ", done=" + done +
