@@ -2,13 +2,14 @@ package ru.job4j.todo.persistance;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import ru.job4j.todo.model.Item;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.function.Function;
 
 public class DBItem {
     private final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
@@ -27,47 +28,83 @@ public class DBItem {
         return Lazy.INST;
     }
 
+    /**
+     * Add item to database.
+     *
+     * @param item item.
+     * @return item.
+     */
     public Item addItem(Item item) {
-        Session session = sf.openSession();
-        session.beginTransaction();
-        session.save(item);
-        session.getTransaction().commit();
-        session.close();
+        request(session -> session.save(item));
         return item;
     }
 
+    /**
+     * Find item by id in database.
+     *
+     * @param id item id.
+     * @return item.
+     */
     public Item findById(int id) {
-        Session session = sf.openSession();
-        session.beginTransaction();
-        Item item = session.get(Item.class, id);
-        session.getTransaction().commit();
-        session.close();
-        return item;
+        return request(
+                session -> session.get(Item.class, id));
     }
 
+    /**
+     * Update item in database.
+     *
+     * @param id   id.
+     * @param item item.
+     */
     public void update(int id, Item item) {
-        Session session = sf.openSession();
-        session.beginTransaction();
-        session.update(String.valueOf(id), item);
-        session.getTransaction().commit();
-        session.close();
+        request(session -> {
+            session.update(String.valueOf(id), item);
+            return null;
+        });
     }
 
+    /**
+     * Selecting from database all items.
+     *
+     * @return list of items.
+     */
     public Collection<Item> findAll() {
-        Session session = sf.openSession();
-        session.beginTransaction();
-        List result = session.createQuery("from ru.job4j.todo.model.Item").list();
-        session.getTransaction().commit();
-        session.close();
-        return result;
+        return request(
+                session -> session.createQuery("from Item").list());
     }
 
+    /**
+     * Selecting from database the items that have status done true or false.
+     *
+     * @param condition true or false.
+     * @return list of items.
+     */
     public Collection<Item> selectDone(boolean condition) {
-        Session session = sf.openSession();
-        session.beginTransaction();
-        List result = session.createQuery("from ru.job4j.todo.model.Item where done=" + condition).list();
-        session.getTransaction().commit();
-        session.close();
-        return result;
+        return request(
+                session -> session.createQuery("from Item where done=" + condition).list()
+        );
     }
+
+    /**
+     * Making function for request to database to exclude duplicating code.
+     *
+     * @param command request
+     * @param <T>     model.
+     * @return result of request.
+     */
+    private <T> T request(final Function<Session, T> command) {
+        final Session session = sf.openSession();
+        final Transaction tx = session.beginTransaction();
+        try {
+            T rsl = command.apply(session);
+            tx.commit();
+            return rsl;
+        } catch (final Exception e) {
+            session.getTransaction().rollback();
+            throw e;
+        } finally {
+            session.close();
+        }
+    }
+
 }
