@@ -1,0 +1,177 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <style>
+        h6 {
+            position: absolute;
+            right: 400px;
+            top: 200px;
+        }
+    </style>
+    <script>
+        function table(data) {
+            let table = $('#table')
+            data.forEach(el => {
+                table.append('<tr>')
+                table.append('<td>' + el.description + '</td>')
+                table.append('<td>' + el.created + '</td>')
+                if (el.done === false) {
+                    table.append('<td>Можно выполнить<div class="row float-right" style="margin-right: 20px">' +
+                        '<button type="reset" class="btn btn-primary" onclick="doTask(' + el.id + ')">Выполнить</button></div> </td>');
+                } else if (el.done === true) {
+                    table.append('<td>Выполнено</td>')
+                }
+                table.append('</tr>');
+            })
+        }
+    </script>
+    <title>Задачи</title>
+</head>
+<body>
+
+<script>
+    function loadTable() {
+        $.ajax({
+            type: 'GET',
+            url: 'http://localhost:8080/ToDo/tasks',
+            dataType: 'json'
+        }).done(function (data) {
+            table(data)
+        });
+    }
+
+    window.onload = loadTable;
+</script>
+<script>
+    function doTask(taskId) {
+        $.ajax({
+            type: 'Post',
+            url: 'http://localhost:8080/ToDo/doTask',
+            data: {id: taskId}
+        }).done(function () {
+            checkFlag()
+        });
+    }
+
+    $(function () {
+        $("#select").on("click", function () {
+            if ($(this).is(":checked")) {
+                $('#table').html("")
+                getActiveTasks()
+            } else {
+                $('#table').html("")
+                loadTable()
+            }
+        })
+    });
+
+    function getActiveTasks() {
+        $.ajax({
+            type: 'Get',
+            url: 'http://localhost:8080/ToDo/activeTasks',
+            dataType: 'json'
+        }).done(function (data) {
+            $('#table').html("")
+            table(data)
+        });
+    }
+
+    function addNewTask(text) {
+        if (text !== '') {
+            $.ajax({
+                type: 'Post',
+                url: 'http://localhost:8080/ToDo/addTask',
+                data: {text: text}
+            }).done(function () {
+                checkFlag()
+                return true;
+            });
+        } else {
+            alert("Пожалуйста, заполниете поле \'описание задачи\'")
+            return false;
+        }
+    }
+
+    function checkFlag() {
+        if ($('input:checkbox[name=check]').is(':checked')) {
+            $('#table').html("")
+            getActiveTasks();
+        } else {
+            $('#table').html("")
+            loadTable()
+        }
+    }
+</script>
+
+<div class="container">
+    <div class="row pt-3">
+        <table class="table table-bordered" style="background-color: azure">
+            <thead>
+            <tr>
+                <h5>
+                    Добавить новую задачу
+                </h5>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <form>
+                        Ведите описание задачи: <label for="text"></label><input type="text" id="text"
+                                                                                 style="width: 600px"/><br/>
+                        <button type="reset" class="btn btn-success" onclick="return addNewTask($('#text').val())">
+                            Добавить задачу
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="container" id="list">
+    <div class="row pt-3">
+        <h2>
+            Список задач.
+        </h2>
+        <h6>
+            <form>
+                только активные задачи
+                <input type="checkbox" name="check" id="select"/>
+            </form>
+        </h6>
+        <table class="table table-bordered" style="background-color: azure">
+            <thead>
+            <tr>
+                <th>Задача</th>
+                <th>Дата создания</th>
+                <th>Процесс выполнения</th>
+            </tr>
+            </thead>
+            <tbody id="table"></tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
