@@ -61,7 +61,8 @@
                         <label for="password">Пароль</label>
                         <input type="text" class="form-control" id="password" title="пароль" name="password">
                     </div>
-                    <button type="submit" class="btn btn-primary" onclick="return validate();">Войти</button>
+                    <button type="submit" class="btn btn-primary" onclick="return validate()">Войти</button>
+                    <div id="val"></div>
                 </form>
             </div>
         </div>

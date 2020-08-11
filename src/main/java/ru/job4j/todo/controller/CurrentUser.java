@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 public class CurrentUser extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        User user = (User) getServletContext().getAttribute("currentUser");
+        User user = (User) req.getSession().getAttribute("user");
         String json = new Gson().toJson(user);
         PrintWriter out = new PrintWriter(resp.getOutputStream(), true, StandardCharsets.UTF_8);
         out.println(json);

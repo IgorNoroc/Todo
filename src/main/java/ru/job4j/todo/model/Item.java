@@ -28,6 +28,10 @@ public class Item {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public User getUser() {
         return user;
     }
@@ -62,22 +66,19 @@ public class Item {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Item item = (Item) o;
-        return id == item.id
-                && done == item.done
-                && Objects.equals(description, item.description)
-                && Objects.equals(created, item.created);
+        return id == item.id &&
+                done == item.done &&
+                Objects.equals(user, item.user) &&
+                Objects.equals(description, item.description) &&
+                Objects.equals(created, item.created);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, description, created, done);
+        return Objects.hash(id, user, description, created, done);
     }
 
     @Override

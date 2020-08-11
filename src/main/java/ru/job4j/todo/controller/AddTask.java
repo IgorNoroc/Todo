@@ -19,6 +19,6 @@ public class AddTask extends HttpServlet {
         item.setCreate(new Date(System.currentTimeMillis()));
         DBItem.instOf().addItem(
                 item,
-                (User) getServletContext().getAttribute("currentUser"));
+                (User) req.getSession().getAttribute("user"));
     }
 }

@@ -19,9 +19,8 @@ public class Registration extends HttpServlet {
         String email = req.getParameter("email");
         String password = req.getParameter("password");
         User user = new User(name, email, password);
-        HttpSession session = req.getSession();
         DBItem.instOf().addUser(user);
-        getServletContext().setAttribute("currentUser", user);
+        HttpSession session = req.getSession();
         session.setAttribute("user", user);
         resp.sendRedirect(req.getContextPath() + "/tasks.html");
     }

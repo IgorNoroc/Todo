@@ -19,7 +19,9 @@ public class ShowTasks extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Collection<Item> items = DBItem.instOf().findAll();
         String json = new Gson().toJson(items);
-        PrintWriter out = new PrintWriter(resp.getOutputStream(), true, StandardCharsets.UTF_8);
+        PrintWriter out = new PrintWriter(
+                resp.getOutputStream(),
+                true, StandardCharsets.UTF_8);
         out.println(json);
     }
 }

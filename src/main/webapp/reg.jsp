@@ -32,7 +32,7 @@
             return true;
         }
     </script>
-    <title>Работа мечты</title>
+    <title>Список задач</title>
 </head>
 <body>
 <div class="container pt-3">

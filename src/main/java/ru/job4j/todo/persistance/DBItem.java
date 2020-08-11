@@ -9,6 +9,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import ru.job4j.todo.model.Item;
 import ru.job4j.todo.model.User;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -41,6 +42,12 @@ public class DBItem {
         return item;
     }
 
+    /**
+     * Add user to database.
+     *
+     * @param user user.
+     * @return user.
+     */
     public User addUser(User user) {
         request(session -> session.save(user));
         return user;
@@ -57,10 +64,21 @@ public class DBItem {
                 session -> session.get(Item.class, id));
     }
 
-    public User findByEmail(String email) {
-        return (User) request(
-                session -> session.createQuery("from User where email='" + email + "'").getSingleResult()
-        );
+    /**
+     * Find user by email.
+     *
+     * @param email email.
+     * @return user or null.
+     */
+    public User findByEmail(String email) throws SQLException {
+        User user;
+        try {
+            user = (User) request(
+                    session -> session.createQuery("from User where email='" + email + "'").getSingleResult());
+        } catch (Exception e) {
+            throw new SQLException();
+        }
+        return user;
     }
 
     /**
@@ -114,10 +132,17 @@ public class DBItem {
             return rsl;
         } catch (final Exception e) {
             session.getTransaction().rollback();
-            e.printStackTrace();
-            return null;
+            throw e;
         } finally {
             session.close();
         }
+    }
+
+    public void deleteAllUsers() {
+        request(session -> session.createQuery("delete from Item").executeUpdate());
+    }
+
+    public void deleteAllItems() {
+        request(session -> session.createQuery("delete User").executeUpdate());
     }
 }
